@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ class _MainAppState extends State<MainApp> {
   List<int> ratio = [];
   List<TextEditingController> title = [];
   double progress = 0;
+  TextEditingController quantityController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,6 +148,21 @@ class _MainAppState extends State<MainApp> {
                               width: 100,
                               child: TextField(
                                 controller: versionController,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: 250,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text("quantity"),
+                            SizedBox(
+                              width: 100,
+                              child: TextField(
+                                controller: quantityController,
                               ),
                             )
                           ],
@@ -345,6 +362,7 @@ class _MainAppState extends State<MainApp> {
     res["title"] = title.map((e) => e.text).toList();
     res["words"] = arrs.map((e) => e.map((e2) => e2.text).toList()).toList();
     res["version"] = versionController.text;
+    res["quantity"] = quantityController.text;
 
     String? resultPath = await FilePicker.platform.saveFile(fileName: "config.tdcf", type: FileType.any);
     if (resultPath != null) {
@@ -373,6 +391,7 @@ class _MainAppState extends State<MainApp> {
         subcategoryDropdownValue,
         title,
         resultPath,
+        int.tryParse(quantityController.text) ?? 0,
       );
       Navigator.pop(context);
     }
@@ -396,6 +415,7 @@ class _MainAppState extends State<MainApp> {
         ratio = (data["ratio"] as List<dynamic>).map((e) => e as int).toList();
         title = (data["title"] as List<dynamic>).map((e) => TextEditingController(text: e as String)).toList();
         versionController.text = data["version"] as String;
+        quantityController.text = data["quantity"] as String;
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Không hợp lệ")));
@@ -414,6 +434,7 @@ Future<void> gen(
   String subcategoryDropdownValue,
   List<TextEditingController> title,
   String resultPath,
+  int quantity,
 ) async {
   List<List<String>> realArrs = [];
   for (int i = 0; i < arrs.length; i++) {
@@ -424,7 +445,9 @@ Future<void> gen(
   }
   var indexLst = List.generate(realArrs.length, (_) => 0);
   List<Map<String, Object>> result = [];
-  while (true) {
+
+  while (quantity > 0) {
+    quantity--;
     // double progress = 1;
     // for (int i = 0; i < indexLst.length; i++) {
     //   progress *= (indexLst[i] + 1) / (realArrs.length + 1);
@@ -435,28 +458,31 @@ Future<void> gen(
     Map<String, Object> tmp = {};
     var content = List.generate(
       indexLst.length,
-      (index) => realArrs[index][indexLst[index]],
+      // (index) => (takeRatio(ratio[index])) ? realArrs[index][indexLst[index]] : "",
+      (index) => (takeRatio(ratio[index])) ? realArrs[index][Random().nextInt(realArrs[index].length)] : "",
     );
     // for (int i = 0; i < content.length; i++) {
     //   content[i] = (Random().nextInt(10) < ratio[i] ~/ 10) ? content[i] : "";
     // }
+    // print(content);
     tmp["content"] = content.where((e) => e != "").join(" ");
     tmp["type"] = typeController.text;
     tmp["category"] = categoryDropdownValue;
     tmp["subcategory"] = subcategoryDropdownValue;
     for (int i = 0; i < indexLst.length; i++) {
-      tmp[title[i].text] = realArrs[i][indexLst[i]];
+      // tmp[title[i].text] = realArrs[i][indexLst[i]];
+      tmp[title[i].text] = content[i];
     }
     result.add(tmp);
-    int cur = 0;
-    while (cur < realArrs.length && realArrs[cur].length - 1 == indexLst[cur]) {
-      indexLst[cur] = 0;
-      cur++;
-    }
-    if (cur == realArrs.length) {
-      break;
-    }
-    indexLst[cur]++;
+    // int cur = 0;
+    // while (cur < realArrs.length && realArrs[cur].length - 1 == indexLst[cur]) {
+    //   indexLst[cur] = 0;
+    //   cur++;
+    // }
+    // if (cur == realArrs.length) {
+    //   break;
+    // }
+    // indexLst[cur]++;
   }
   await Isolate.run(() => File(resultPath).writeAsStringSync(json.encode(result)));
   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Xuất thành công")));
@@ -468,4 +494,8 @@ extension SwappableList<E> on List<E> {
     this[first] = this[second];
     this[second] = temp;
   }
+}
+
+bool takeRatio(int ratio) {
+  return Random().nextInt(100) < ratio;
 }
