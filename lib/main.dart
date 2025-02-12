@@ -39,6 +39,12 @@ class _MainAppState extends State<MainApp> {
   List<TextEditingController> title = [];
   double progress = 0;
   TextEditingController quantityController = TextEditingController();
+  List<List<List<String>>> deletes = [];
+
+  List<bool> titleSelected = [];
+  int curCol = -2;
+  int curRow = -2;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,6 +201,7 @@ class _MainAppState extends State<MainApp> {
                                               onPressed: () {
                                                 setState(() {
                                                   arrs.swap(index, index - 1);
+                                                  deletes.swap(index, index - 1);
                                                 });
                                               },
                                               icon: const Icon(
@@ -207,6 +214,7 @@ class _MainAppState extends State<MainApp> {
                                             onPressed: () {
                                               setState(() {
                                                 arrs.removeAt(index);
+                                                deletes.removeAt(index);
                                               });
                                             },
                                             icon: const Icon(
@@ -221,6 +229,7 @@ class _MainAppState extends State<MainApp> {
                                               onPressed: () {
                                                 setState(() {
                                                   arrs.swap(index, index + 1);
+                                                  deletes.swap(index, index + 1);
                                                 });
                                               },
                                               icon: const Icon(
@@ -257,11 +266,23 @@ class _MainAppState extends State<MainApp> {
                                                 width: 100,
                                                 child: TextField(
                                                   controller: title[index],
-                                                  decoration: const InputDecoration(
-                                                      label: Text(
-                                                    "title",
-                                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                                  )),
+                                                  decoration: InputDecoration(
+                                                      label: const Text(
+                                                        "title",
+                                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                                      ),
+                                                      suffixIcon: IconButton(
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              titleSelected[index] = !titleSelected[index];
+                                                            });
+                                                          },
+                                                          icon: titleSelected[index]
+                                                              ? const Icon(
+                                                                  Icons.check_box,
+                                                                  color: Colors.green,
+                                                                )
+                                                              : const Icon(Icons.check_box_outline_blank))),
                                                   style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
                                                 ),
                                               ),
@@ -273,19 +294,43 @@ class _MainAppState extends State<MainApp> {
                                                     child: SizedBox(
                                                       width: 100,
                                                       child: TextField(
+                                                        onTap: () {
+                                                          setState(() {
+                                                            curCol = index;
+                                                            curRow = index2;
+                                                          });
+                                                        },
                                                         controller: col[index2],
                                                         decoration: InputDecoration(
-                                                          suffixIcon: IconButton(
-                                                            onPressed: () {
-                                                              setState(
-                                                                () {
-                                                                  arrs[index].removeAt(index2);
-                                                                },
-                                                              );
-                                                            },
-                                                            icon: const Icon(Icons.close),
-                                                          ),
-                                                        ),
+                                                            suffixIcon: IconButton(
+                                                              onPressed: () {
+                                                                setState(
+                                                                  () {
+                                                                    arrs[index].removeAt(index2);
+                                                                    deletes[index].removeAt(index2);
+                                                                  },
+                                                                );
+                                                              },
+                                                              icon: const Icon(Icons.close),
+                                                            ),
+                                                            prefixIcon: (curCol == index - 1)
+                                                                ? IconButton(
+                                                                    onPressed: () {
+                                                                      setState(() {
+                                                                        if (deletes[curCol][curRow].contains(col[index2].text)) {
+                                                                          deletes[curCol][curRow].remove(col[index2].text);
+                                                                        } else {
+                                                                          deletes[curCol][curRow].add(col[index2].text);
+                                                                        }
+                                                                      });
+                                                                    },
+                                                                    icon: Icon(
+                                                                      Icons.indeterminate_check_box,
+                                                                      color: (deletes[curCol][curRow].contains(col[index2].text))
+                                                                          ? Colors.red
+                                                                          : Colors.grey,
+                                                                    ))
+                                                                : null),
                                                       ),
                                                     ),
                                                   );
@@ -295,6 +340,7 @@ class _MainAppState extends State<MainApp> {
                                                 onPressed: () {
                                                   setState(() {
                                                     arrs[index].add(TextEditingController());
+                                                    deletes[index].add([]);
                                                   });
                                                 },
                                                 icon: const Icon(Icons.add),
@@ -314,7 +360,9 @@ class _MainAppState extends State<MainApp> {
                           onPressed: () {
                             setState(() {
                               title.add(TextEditingController());
+                              titleSelected.add(true);
                               arrs.add([TextEditingController()]);
+                              deletes.add([[]]);
                               ratio.add(100);
                             });
                           },
@@ -360,7 +408,9 @@ class _MainAppState extends State<MainApp> {
     res["subcategory"] = subcategoryDropdownValue;
     res["ratio"] = ratio;
     res["title"] = title.map((e) => e.text).toList();
+    res["titleSelected"] = titleSelected;
     res["words"] = arrs.map((e) => e.map((e2) => e2.text).toList()).toList();
+    res["deletes"] = deletes.map((e) => e.map((e2) => e2.map((e3) => e3).toList()).toList()).toList();
     res["version"] = versionController.text;
     res["quantity"] = quantityController.text;
 
@@ -390,8 +440,10 @@ class _MainAppState extends State<MainApp> {
         categoryDropdownValue,
         subcategoryDropdownValue,
         title,
+        titleSelected,
         resultPath,
         int.tryParse(quantityController.text) ?? 0,
+        deletes,
       );
       Navigator.pop(context);
     }
@@ -414,6 +466,10 @@ class _MainAppState extends State<MainApp> {
         subcategoryDropdownValue = data["subcategory"] as String;
         ratio = (data["ratio"] as List<dynamic>).map((e) => e as int).toList();
         title = (data["title"] as List<dynamic>).map((e) => TextEditingController(text: e as String)).toList();
+        titleSelected = (data["titleSelected"] as List<dynamic>? ?? (List.generate(title.length, (_) => true))).map((e) => e as bool).toList();
+        deletes = (data["deletes"] as List<dynamic>? ?? List.generate(arrs.length, (index) => List.generate(arrs[index].length, (index2) => [])))
+            .map((e1) => (e1 as List<dynamic>).map((e2) => (e2 as List<dynamic>).map((e3) => (e3 as String)).toList()).toList())
+            .toList();
         versionController.text = data["version"] as String;
         quantityController.text = data["quantity"] as String;
       }
@@ -433,8 +489,10 @@ Future<void> gen(
   String categoryDropdownValue,
   String subcategoryDropdownValue,
   List<TextEditingController> title,
+  List<bool> titleSelected,
   String resultPath,
   int quantity,
+  List<List<List<String>>> deletes,
 ) async {
   List<List<String>> realArrs = [];
   for (int i = 0; i < arrs.length; i++) {
@@ -445,6 +503,8 @@ Future<void> gen(
   }
   var indexLst = List.generate(realArrs.length, (_) => 0);
   List<Map<String, Object>> result = [];
+
+  var curDelete = <String>[];
 
   while (quantity > 0) {
     quantity--;
@@ -459,7 +519,20 @@ Future<void> gen(
     var content = List.generate(
       indexLst.length,
       // (index) => (takeRatio(ratio[index])) ? realArrs[index][indexLst[index]] : "",
-      (index) => (takeRatio(ratio[index])) ? realArrs[index][Random().nextInt(realArrs[index].length)] : "",
+      (index) {
+        final tmp = Random().nextInt(realArrs[index].length);
+        final tmp2 = realArrs[index][tmp];
+        if (curDelete.contains(tmp2)) {
+          curDelete = [];
+          return "";
+        }
+        if (!takeRatio(ratio[index])) {
+          curDelete = [];
+          return "";
+        }
+        curDelete = deletes[index][tmp];
+        return tmp2;
+      },
     );
     // for (int i = 0; i < content.length; i++) {
     //   content[i] = (Random().nextInt(10) < ratio[i] ~/ 10) ? content[i] : "";
@@ -471,7 +544,9 @@ Future<void> gen(
     tmp["subcategory"] = subcategoryDropdownValue;
     for (int i = 0; i < indexLst.length; i++) {
       // tmp[title[i].text] = realArrs[i][indexLst[i]];
-      tmp[title[i].text] = content[i];
+      if (titleSelected[i]) {
+        tmp[title[i].text] = content[i];
+      }
     }
     result.add(tmp);
     // int cur = 0;
