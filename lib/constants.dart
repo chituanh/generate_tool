@@ -1,5 +1,5 @@
 final Map<String, List<String>> categories = {
-  "Ăn uống": ["Cafe", "Ăn sáng", "Ăn trưa", "Ăn tối"],
+  "Ăn uống": ["Đồ uống", "Cafe", "Ăn sáng", "Ăn trưa", "Ăn tối"],
   "Đi lại": ["Xăng xe", "Gửi xe", "Bảo hiểm xe", "Taxi/Thuê xe", "Sửa chữa xe"],
   "Sức khoẻ": ["Khám chữa bệnh", "Thuốc men", "Thể thao", "Bảo hiểm y tế"],
   "Dịch vụ sinh hoạt": ["Điện", "Nước", "Internet", "Gas", "Truyền hình", "Điện thoại", "Đi siêu thị/chợ"],
