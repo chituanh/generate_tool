@@ -45,6 +45,8 @@ class _MainAppState extends State<MainApp> {
   int curCol = -2;
   int curRow = -2;
 
+  String? fileName;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -201,6 +203,9 @@ class _MainAppState extends State<MainApp> {
                                               onPressed: () {
                                                 setState(() {
                                                   arrs.swap(index, index - 1);
+                                                  title.swap(index, index - 1);
+                                                  ratio.swap(index, index - 1);
+                                                  titleSelected.swap(index, index - 1);
                                                   deletes.swap(index, index - 1);
                                                 });
                                               },
@@ -229,6 +234,9 @@ class _MainAppState extends State<MainApp> {
                                               onPressed: () {
                                                 setState(() {
                                                   arrs.swap(index, index + 1);
+                                                  title.swap(index, index + 1);
+                                                  ratio.swap(index, index + 1);
+                                                  titleSelected.swap(index, index + 1);
                                                   deletes.swap(index, index + 1);
                                                 });
                                               },
@@ -414,7 +422,9 @@ class _MainAppState extends State<MainApp> {
     res["version"] = versionController.text;
     res["quantity"] = quantityController.text;
 
-    String? resultPath = await FilePicker.platform.saveFile(fileName: "config.tdcf", type: FileType.any);
+    fileName = "${versionController.text}_${categoryDropdownValue}_${subcategoryDropdownValue}_${quantityController.text}";
+
+    String? resultPath = await FilePicker.platform.saveFile(fileName: "$fileName.tdcf", type: FileType.any);
     if (resultPath != null) {
       File(resultPath).writeAsStringSync(json.encode(res));
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lưu cài đặt thành công")));
@@ -422,7 +432,9 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> exportFile() async {
-    String? resultPath = await FilePicker.platform.saveFile(fileName: "result.txt", type: FileType.any);
+    String? resultPath = await FilePicker.platform.saveFile(
+        fileName: "${fileName ?? "${versionController.text}_${categoryDropdownValue}_${subcategoryDropdownValue}_${quantityController.text}"}.txt",
+        type: FileType.any);
 
     if (resultPath != null) {
       showDialog(
@@ -454,6 +466,7 @@ class _MainAppState extends State<MainApp> {
     try {
       if (result != null) {
         var file = File(result.files.single.path!);
+        fileName = result.files.single.name.split('.').first;
         final String response = await file.readAsString(); //await rootBundle.loadString(result.files.single.path!);
         final data = await json.decode(response) as Map<String, dynamic>;
         // print(data["words"]);
