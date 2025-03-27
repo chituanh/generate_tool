@@ -1,5 +1,5 @@
 final Map<String, List<String>> categories = {
-  "Ăn uống": ["Đồ uống", "Cafe", "Ăn sáng", "Ăn trưa", "Ăn tối"],
+  "Ăn uống": ["Đồ uống", "Cafe", "Ăn sáng", "Ăn trưa", "Ăn tối", "Ăn vặt"],
   "Đi lại": ["Xăng xe", "Gửi xe", "Bảo hiểm xe", "Taxi/Thuê xe", "Sửa chữa xe"],
   "Sức khoẻ": ["Khám chữa bệnh", "Thuốc men", "Thể thao", "Bảo hiểm y tế"],
   "Dịch vụ sinh hoạt": ["Điện", "Nước", "Internet", "Gas", "Truyền hình", "Điện thoại", "Đi siêu thị/chợ"],
@@ -12,6 +12,7 @@ final Map<String, List<String>> categories = {
   "Thú cưng": ["Mèo", "Chó"],
   "Ngân hàng": ["Phí chuyển khoản", "Trả lãi vay", "Trả nợ ngân hàng"],
   "Đầu tư": ["Chứng khoán", "Vàng", "Tiền số", "Trái phiếu", "Nhà/đất"],
-  "Tiết kiệm": [""],
-  "Thu": ["Lương", "Thưởng", "Thu hồi nợ", "Kinh doanh", "Trợ cấp", "Rút tiền tiết kiệm", "Bán tài sản"]
+  "Tiết kiệm": ["Gửi tiền tiết kiệm", "Cho vay"],
+  "Thu": ["Lương", "Thưởng", "Thu hồi nợ", "Kinh doanh", "Trợ cấp", "Rút tiền tiết kiệm", "Bán tài sản"],
+  "Shopping": ["Đi chợ", "Đi siêu thị"],
 };

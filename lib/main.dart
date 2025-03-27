@@ -433,7 +433,7 @@ class _MainAppState extends State<MainApp> {
 
   Future<void> exportFile() async {
     String? resultPath = await FilePicker.platform.saveFile(
-        fileName: "${fileName ?? "${versionController.text}_${categoryDropdownValue}_${subcategoryDropdownValue}_${quantityController.text}"}.txt",
+        fileName: "${fileName ?? "${versionController.text}_${categoryDropdownValue}_${subcategoryDropdownValue}_${quantityController.text}"}.json",
         type: FileType.any);
 
     if (resultPath != null) {
