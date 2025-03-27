@@ -12,5 +12,6 @@ final Map<String, List<String>> categories = {
   "Thú cưng": ["Mèo", "Chó"],
   "Ngân hàng": ["Phí chuyển khoản", "Trả lãi vay", "Trả nợ ngân hàng"],
   "Đầu tư": ["Chứng khoán", "Vàng", "Tiền số", "Trái phiếu", "Nhà/đất"],
-  "Tiết kiệm": [""]
+  "Tiết kiệm": [""],
+  "Thu": ["Lương", "Thưởng", "Thu hồi nợ", "Kinh doanh", "Trợ cấp", "Rút tiền tiết kiệm", "Bán tài sản"]
 };
